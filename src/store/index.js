@@ -22,10 +22,9 @@ function GlobalStoreContextProvider(props) {
         listOfStates: [],
         alphabet: [],
         acceptingStates: [],
-        transitionTable: {}
+        transitionTable: {currentlyEditingCell: null, table: {}},
+        generateTable: false,
     });
-
-    // const history = useHistory();
 
     const storeReducer = (action) => {
         const {type, payload} = action;
@@ -75,6 +74,16 @@ function GlobalStoreContextProvider(props) {
                     acceptingStates: store.acceptingStates,
                     transitionTable: payload
                 });
+            //Edit for cell clicking functionality.
+            case GlobalStoreActionType.UPDATE_CURRENTLY_EDITING:
+                return setStore({
+                    currentPage:store.currentPage,
+                    listOfStates: store.listOfStates,
+                    alphabet: store.alphabet,
+                    acceptingStates: store.acceptingStates,
+                    transitionTable: payload
+
+                })
             
             default:
                 break;
@@ -96,9 +105,16 @@ function GlobalStoreContextProvider(props) {
     }
 
     store.updateAlphabet = (alphabetString) => {
+        let alphabetPayload = [];
+        if (alphabetString === "") {
+            alphabetPayload = []
+        } else {
+            alphabetPayload = alphabetString.split(",").map(item => item.trim())
+        }
+
         storeReducer({
             type: GlobalStoreActionType.UPDATE_ALPHABET,
-            payload: alphabetString.split(",").map(item => item.trim())
+            payload: alphabetPayload
         });
     }
 
@@ -114,6 +130,13 @@ function GlobalStoreContextProvider(props) {
             type: "UPDATE_TRANSITION_TABLE",
             payload: transitionTable
         });
+    }
+
+    store.update_currently_editing_cell = () => {
+        storeReducer({
+            type: "UPDATE_CURRENTLY_EDITING_CELL",
+
+        })
     }
 
     return (
