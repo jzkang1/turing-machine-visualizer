@@ -6,7 +6,6 @@ export default function VisualizePage(props) {
     return (
         <React.Fragment>
             <Input/>
-            <TransitionTable/>
         </React.Fragment>
     );
 }
