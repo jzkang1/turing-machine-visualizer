@@ -98,17 +98,19 @@ function GlobalStoreContextProvider(props) {
     }
 
     store.updateStates = function(statesString) {
+        let statesPayload = [];
+        if (statesString !== "") {
+            statesPayload = statesString.split(",").map(item => item.trim());
+        }
         storeReducer({
             type: GlobalStoreActionType.UPDATE_STATES,
-            payload: statesString.split(",").map(item => item.trim())
+            payload: statesPayload
         });
     }
 
     store.updateAlphabet = (alphabetString) => {
         let alphabetPayload = [];
-        if (alphabetString === "") {
-            alphabetPayload = []
-        } else {
+        if (alphabetString !== "") {
             alphabetPayload = alphabetString.split(",").map(item => item.trim())
         }
 
@@ -125,18 +127,18 @@ function GlobalStoreContextProvider(props) {
         });
     }
 
-    store.update_transition_table = (transitionTable) => {
+    store.updateTransitionTable = (transitionTable) => {
         storeReducer({
             type: "UPDATE_TRANSITION_TABLE",
             payload: transitionTable
         });
     }
 
-    store.update_currently_editing_cell = () => {
+    store.updateCurrentlyEditingCell = () => {
         storeReducer({
             type: "UPDATE_CURRENTLY_EDITING_CELL",
 
-        })
+        });
     }
 
     return (
