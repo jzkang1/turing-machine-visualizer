@@ -42,14 +42,6 @@ export default function AboutPage() {
 
   return (
     <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <AppBar position="relative">
-        <Toolbar>
-          <Typography variant="h6" color="inherit" noWrap>
-            TM
-          </Typography>
-        </Toolbar>
-      </AppBar>
       <main>
         {/* Hero unit */}
         <Box
@@ -68,11 +60,29 @@ export default function AboutPage() {
               color="text.primary"
               gutterBottom
             >
-              Turing Machine Visualizer
+              What is a Turing Machine?
             </Typography>
 
-            <Typography variant="h5" align="center" color="text.secondary" paragraph>
-              Filler
+            <Typography variant="h5" align="justify" color="text.secondary" paragraph>
+              Imagine an infinite length of tape. The tape is then divided into infinite squares.
+              Each square can either be 1, 0, or blank. Now imagine a box that runs along this tape,
+              scanning each square. The box has predetermined instructions for each square or 'state' and as it scans each square,
+              it will change it accordingly. Eventually the box will hopefully halt, leaving a new set of 1's, 0's, and blanks. This
+              new set would then contain the answer to problem that was trying to be solved. 
+            </Typography>
+            <hr></hr>
+            <Typography
+              component="h1"
+              variant="h2"
+              align="center"
+              color="text.primary"
+              gutterBottom
+            >
+              What's the big deal?
+            </Typography>
+            <Typography variant="h5" align="justify" color="text.secondary" paragraph>
+            While this might be extremely simple, this "machine" would be capable of doing anything that
+            a modern day computer can do. This is because
             </Typography>
             <Stack
               sx={{ pt: 4 }}
