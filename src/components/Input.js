@@ -1,7 +1,7 @@
 import TextField from '@mui/material/TextField';
 import React from 'react';
-import { useContext } from 'react'
-import { GlobalStoreContext } from '../store'
+import { useContext } from 'react';
+import { GlobalStoreContext } from '../store';
 
 function Input() {
     const {store} = useContext(GlobalStoreContext);

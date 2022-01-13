@@ -3,15 +3,26 @@ import { createContext, useState} from 'react';
 const GlobalStoreContext = createContext({});
 
 export const GlobalStoreActionType = {
-    
+    NAVIGATE_PAGE: "NAVIGATE_PAGE",
+    UPDATE_STATES: "UPDATE_STATES",
+    UPDATE_ALPHABET: "UPDATE_ALPHABET",
+    UPDATE_ACCEPTING_STATES: "UPDATE_ACCEPTING_STATES",
+    UPDATE_TRANSITION_TABLE: "UPDATE_TRANSITION_TABLE",
+}
+
+export const GlobalStorePageType = {
+    HOME: "HOME",
+    ABOUT: "ABOUT",
+    VISUALIZE: "VISUALIZE",
 }
 
 function GlobalStoreContextProvider(props) {
     const [store, setStore] = useState({
+        currentPage: GlobalStorePageType.HOME,
         listOfStates: [],
         alphabet: [],
-        transitionTable: {},
-        acceptingStates: []
+        acceptingStates: [],
+        transitionTable: {}
     });
 
     // const history = useHistory();
@@ -20,60 +31,80 @@ function GlobalStoreContextProvider(props) {
         const {type, payload} = action;
         
         switch(type) {
-            case "UPDATE_STATES":
+            case GlobalStoreActionType.NAVIGATE_PAGE:
                 return setStore({
+                    currentPage: payload,
+                    listOfStates: store.listOfStates,
+                    alphabet: store.alphabet,
+                    acceptingStates: store.acceptingStates,
+                    transitionTable: store.transitionTable
+                });
+
+            case GlobalStoreActionType.UPDATE_STATES:
+                return setStore({
+                    currentPage: store.currentPage,
                     listOfStates: payload,
                     alphabet: store.alphabet,
-                    transitionTable: store.transitionTable,
-                    acceptingStates: store.acceptingStates
+                    acceptingStates: store.acceptingStates,
+                    transitionTable: store.transitionTable
                 });
-                break;
             
-            case "UPDATE_ALPHABET":
+            case GlobalStoreActionType.UPDATE_ALPHABET:
                 return setStore({        
+                    currentPage: store.currentPage,
                     listOfStates: store.listOfStates,
                     alphabet: payload,
-                    transitionTable: store.transitionTable,
-                    acceptingStates: store.acceptingStates
+                    acceptingStates: store.acceptingStates,
+                    transitionTable: store.transitionTable
                 });
-                break;
             
-            case "UPDATE_ACCEPTING_STATES":
+            case GlobalStoreActionType.UPDATE_ACCEPTING_STATES:
                 return setStore({
+                    currentPage: store.currentPage,
                     listOfStates: store.listOfStates,
                     alphabet: store.alphabet,
-                    transitionTable: store.transitionTable,
                     acceptingStates: payload,
-                })
-                break;
+                    transitionTable: store.transitionTable
+                });
             
-            case "UPDATE_TRANSITION_TABLE":
+            case GlobalStoreActionType.UPDATE_TRANSITION_TABLE:
                 return setStore({
+                    currentPage: store.currentPage,
                     listOfStates: store.listOfStates,
                     alphabet: store.alphabet,
-                    transitionTable: payload,
-                    acceptingStates: store.acceptingStates
-                })
+                    acceptingStates: store.acceptingStates,
+                    transitionTable: payload
+                });
+            
+            default:
+                break;
         }
     }
 
-    store.update_states = function(statesString) {
+    store.navigatePage = function(pageType) {
         storeReducer({
-            type: "UPDATE_STATES",
+            type: GlobalStoreActionType.NAVIGATE_PAGE,
+            payload: pageType
+        });
+    }
+
+    store.updateStates = function(statesString) {
+        storeReducer({
+            type: GlobalStoreActionType.UPDATE_STATES,
             payload: statesString.split(",").map(item => item.trim())
         });
     }
 
-    store.update_alphabet = (alphabetString) => {
+    store.updateAlphabet = (alphabetString) => {
         storeReducer({
-            type: "UPDATE_ALPHABET",
+            type: GlobalStoreActionType.UPDATE_ALPHABET,
             payload: alphabetString.split(",").map(item => item.trim())
         });
     }
 
-    store.update_accepting_states = (acceptingStatesString) => {
+    store.updateAcceptingStates = (acceptingStatesString) => {
         storeReducer({
-            type: "UPDATE_ACCEPTING_STATES",
+            type: GlobalStoreActionType.UPDATE_ACCEPTING_STATES,
             payload: acceptingStatesString.split(",").map(item => item.trim())
         });
     }

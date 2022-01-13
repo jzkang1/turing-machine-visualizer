@@ -1,12 +1,22 @@
+import { useContext } from 'react';
+import { GlobalStoreContext } from './store';
 import './App.css';
-import Input from "./components/Input.js"
-import {GlobalStoreContextProvider} from "./store"
+import CurrentPage from "./components/CurrentPage.js";
+import {GlobalStoreContextProvider} from "./store";
 
 function App() {
+    const {store} = useContext(GlobalStoreContext);
+
+    const getCurrentPage = () => {
+        if (store.currentPage) {
+
+        }
+    }
+
     return (
         <GlobalStoreContextProvider>
             <div className="App">
-                <Input/>
+                <CurrentPage/>
             </div>
         </GlobalStoreContextProvider>
     );
