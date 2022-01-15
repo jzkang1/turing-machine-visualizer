@@ -19,7 +19,6 @@ export const GlobalStorePageType = {
 
 function GlobalStoreContextProvider(props) {
     const [store, setStore] = useState({
-        currentPage: GlobalStorePageType.HOME,
         listOfStates: [],
         alphabet: [],
         acceptingStates: [],
@@ -33,7 +32,6 @@ function GlobalStoreContextProvider(props) {
         switch(type) {
             case GlobalStoreActionType.NAVIGATE_PAGE:
                 return setStore({
-                    currentPage: payload,
                     listOfStates: store.listOfStates,
                     alphabet: store.alphabet,
                     acceptingStates: store.acceptingStates,
@@ -43,7 +41,6 @@ function GlobalStoreContextProvider(props) {
 
             case GlobalStoreActionType.UPDATE_LIST_OF_STATES:
                 return setStore({
-                    currentPage: store.currentPage,
                     listOfStates: payload,
                     alphabet: store.alphabet,
                     acceptingStates: store.acceptingStates,
@@ -54,7 +51,6 @@ function GlobalStoreContextProvider(props) {
             
             case GlobalStoreActionType.UPDATE_ALPHABET:
                 return setStore({        
-                    currentPage: store.currentPage,
                     listOfStates: store.listOfStates,
                     alphabet: payload,
                     acceptingStates: store.acceptingStates,
@@ -65,7 +61,6 @@ function GlobalStoreContextProvider(props) {
             
             case GlobalStoreActionType.UPDATE_ACCEPTING_STATES:
                 return setStore({
-                    currentPage: store.currentPage,
                     listOfStates: store.listOfStates,
                     alphabet: store.alphabet,
                     acceptingStates: payload,
@@ -76,7 +71,6 @@ function GlobalStoreContextProvider(props) {
             
             case GlobalStoreActionType.UPDATE_TRANSITION_TABLE:
                 return setStore({
-                    currentPage: store.currentPage,
                     listOfStates: store.listOfStates,
                     alphabet: store.alphabet,
                     acceptingStates: store.acceptingStates,

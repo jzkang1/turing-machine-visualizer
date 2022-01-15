@@ -48,8 +48,8 @@ export default function Input() {
             changed = true;
         }
 
-        if (!equalArray(store.listOfStates, alphabet)) {
-            store.updateAlphabet(listOfStates);
+        if (!equalArray(store.alphabet, alphabet)) {
+            store.updateAlphabet(alphabet);
             changed = true;
         }
 
