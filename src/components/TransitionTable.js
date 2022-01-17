@@ -121,6 +121,7 @@ export default function TransitionTable(props) {
     function addColumn(table, states, alphabet){
         let latestCharacter = parseInt(alphabet[alphabet.length-1]);
         let newCharacter = (latestCharacter + 1).toString();
+        alphabet.push(newCharacter);
         let newTransitionTable = table;
         for(let state of states){
             newTransitionTable[state][newCharacter] = {action: null, newState: null}
