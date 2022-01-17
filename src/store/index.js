@@ -1,23 +1,25 @@
 import { createContext, useState} from 'react';
+import { getStatesFromTable, getAlphabetFromTable, deepObjectCopy } from '../utils.js';
 
 const GlobalStoreContext = createContext({});
 
 export const GlobalStoreActionType = {
     UPDATE_TRANSITION_TABLE: "UPDATE_TRANSITION_TABLE",
     RESET_TRANSITION_TABLE: "RESET_TRANSITION_TABLE",
-    UPDATE_CURRENTLY_EDITING_CELL: "UPDATE_CURRENTLY_EDITING_CELL",
     SET_RESET_TABLE_MODAL: "SET_RESET_TABLE_MODAL",
 }
 
 export const GlobalStoreDefaultTransitionTable = {
-    q1: {"a":{write: null, action: null}, "b":{write: null, action: null}},
-    q2: {"a":{write: null, action: null}, "b":{write: null, action: null}},
+    q1: {"0":{action: null, newState: null}, "1":{action: null, newState: null}},
+    q2: {"0":{action: null, newState: null}, "1":{action: null, newState: null}},
 }
 
 function GlobalStoreContextProvider(props) {
     const [store, setStore] = useState({
-        transitionTable: GlobalStoreDefaultTransitionTable,
-        currentlyEditingCell: null,
+        transitionTable: deepObjectCopy(GlobalStoreDefaultTransitionTable),
+        states: ["q1", "q2"],
+        alphabet: ["0", "1"],
+        acceptingStates: [],
         resetTableModalOpen: false,
     });
 
@@ -27,29 +29,28 @@ function GlobalStoreContextProvider(props) {
         switch(type) {
             case GlobalStoreActionType.UPDATE_TRANSITION_TABLE:
                 return setStore({
-                    transitionTable: payload,
-                    currentlyEditingCell: store.currentlyEditingCell,
+                    transitionTable: payload.newTransitionTable,
+                    states: payload.newStates,
+                    alphabet: payload.newAlphabet,
+                    acceptingStates: store.acceptingStates,
                     resetTableModalOpen: store.resetTableModalOpen,
                 });
 
             case GlobalStoreActionType.RESET_TRANSITION_TABLE:
                 return setStore({
-                    transitionTable: GlobalStoreDefaultTransitionTable,
-                    currentlyEditingCell: null,
+                    transitionTable: deepObjectCopy(GlobalStoreDefaultTransitionTable),
+                    states: ["q1", "q2"],
+                    alphabet: ["0", "1"],
+                    acceptingStates: [],
                     resetTableModalOpen: false,
                 });
 
-            case GlobalStoreActionType.UPDATE_CURRENTLY_EDITING_CELL:
-                return setStore({
-                    transitionTable: store.transitionTable,
-                    currentlyEditingCell : payload,
-                    resetTableModalOpen: store.resetTableModalOpen,
-                });
-            
             case GlobalStoreActionType.SET_RESET_TABLE_MODAL:
                 return setStore({
                     transitionTable: store.transitionTable,
-                    currentlyEditingCell : store.currentlyEditingCell,
+                    states: store.states,
+                    alphabet: store.alphabet,
+                    acceptingStates: store.acceptingStates,
                     resetTableModalOpen: payload,
                 });
             
@@ -58,29 +59,21 @@ function GlobalStoreContextProvider(props) {
         }
     }
 
-    store.updateTransitionTable = (transitionTable) => {
-        console.log("updated transition table");
-        console.log(transitionTable);
+    store.updateTransitionTable = (newTransitionTable, newStates, newAlphabet) => {
         storeReducer({
             type: GlobalStoreActionType.UPDATE_TRANSITION_TABLE,
-            payload: transitionTable
+            payload: {
+                newTransitionTable,
+                newStates,
+                newAlphabet,
+            }
         });
     }
 
     store.resetTransitionTable = () => {
-        console.log("reset transition table");
         storeReducer({
             type: GlobalStoreActionType.RESET_TRANSITION_TABLE,
             payload: null
-        });
-    }
-
-    store.updateCurrentlyEditingCell = (cell) => {
-        console.log("updated currently editing cell");
-        console.log(cell);
-        storeReducer({
-            type: GlobalStoreActionType.UPDATE_CURRENTLY_EDITING_CELL,
-            payload: cell
         });
     }
 
