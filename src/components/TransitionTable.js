@@ -1,26 +1,25 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import { useContext } from 'react';
 import { GlobalStoreContext } from '../store';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import TextField from '@mui/material/TextField';
+import { TableContainer, Table, TableHead, TableBody, TableRow, TableCell } from '@mui/material/';
+import { TextField } from '@mui/material';
 import Paper from '@mui/material/Paper';
 import Button from '@mui/material/Button';
+import { Stack } from '@mui/material';
+import { Modal } from '@mui/material';
+import { Backdrop } from '@mui/material';
+import { Fade } from '@mui/material';
+import { Box } from '@mui/system';
+import { Typography } from '@mui/material';
+
 
 export default function TransitionTable(props) {
     const {store} = useContext(GlobalStoreContext);
-    
-    const [table, setTable] = useState(null);
 
-    // useEffect(() => {
-    //     handleGenerateTable();
-    // }, [store.currentlyEditingCell]);
+    useEffect(() => {
+    }, [store.currentlyEditingCell]);
       
-    function getMaxWidth(alphabet) {
+    function getMaxTableWidth(alphabet) {
         if (alphabet.length < 10) {
             return 400 + alphabet.length*50;
         } else {
@@ -28,42 +27,69 @@ export default function TransitionTable(props) {
         }
     }
 
+    function getStatesFromTable(table) {
+        let states = [];
+        for (let state in table) {
+            states.push(state);
+        }
+        return states;
+    }
+
+    function getAlphabetFromTable(table) {
+        let randomState = Object.keys(table)[0];
+        let alphabet = [];
+        for (let parseCharacter in table[randomState]) {
+            alphabet.push(parseCharacter);
+        }
+        return alphabet;
+    }
+
     function getAlphabetRow(alphabet) {
-        let row = [];
+        let row = [<TableCell key="states">States</TableCell>];
+        if (alphabet === null || alphabet.length === 0) {
+            return row;
+        }
+
         for (let i = 0; i < alphabet.length; i++) {
-            row.push(<TableCell align="center" sx={{minWidth: 50}}>{alphabet[i]}</TableCell>);
+            row.push(<TableCell key={alphabet[i]} align="center" sx={{minWidth: 50}}>{alphabet[i]}</TableCell>);
         }
         return row;
     }
 
-    function getStateRows(table, listOfStates, alphabet, currentlyEditingCell) {
+    function getStateRows(table, states, alphabet, currentlyEditingCell) {
         let rows = [];
-        for (let i = 0; i < listOfStates.length; i++) {
-            let row = [<TableCell component="th">{listOfStates[i]}</TableCell>];
-            for (let j = 0; j < alphabet.length; j++) {
-                if (currentlyEditingCell !== null 
-                    && currentlyEditingCell.state  === listOfStates[i] 
-                    && currentlyEditingCell.character === alphabet[j]) {
+        for (let state of states) {
+            let row = [<TableCell component="th">{state}</TableCell>];
+            for (let parseCharacter of alphabet) {
+                if (currentlyEditingCell !== null
+                    && currentlyEditingCell.state  === state
+                    && currentlyEditingCell.parseCharacter === parseCharacter) {
                     row.push(
-                        <TextField onKeyPress={(event) => {handleOnEnter(event)}}
-                        placeholder={currentlyEditingCell.state !== null ? currentlyEditingCell.state : "Input something"} sx={{maxWidth: 100}}></TextField>
+                        <TextField
+                        key={state + " " + parseCharacter}
+                        sx={{maxWidth: 100}}
+                        placeholder={currentlyEditingCell.state !== null ? currentlyEditingCell.state : "Input something"}
+                        onKeyPress={(event) => {handleOnEnter(event)}}
+                        />
                     );
-                } else {  
+                } else {
                     row.push(
-                    <TableCell onDoubleClick={(event) => {handleTableCellDoubleClick(event, listOfStates[i], alphabet[j])}} 
-                    align="center"
-                    key={listOfStates[i] + " " + alphabet[j]}>
-                        {"("
-                        + (table[listOfStates[i]][alphabet[j]].write === null ? "_" : table[listOfStates[i]][alphabet[j]].write)
-                        + ","
-                        + (table[listOfStates[i]][alphabet[j]].action === null ? "_" : table[listOfStates[i]][alphabet[j]].action)
-                        + ")"}
-                    </TableCell>
+                        <TableCell
+                        key={state + " " + parseCharacter}
+                        onDoubleClick={(event) => {handleTableCellDoubleClick(event, state, parseCharacter)}} 
+                        align="center"
+                        >
+                            {"("
+                            + (table[state][parseCharacter].write === null ? "_" : table[state][parseCharacter].write)
+                            + ","
+                            + (table[state][parseCharacter].action === null ? "_" : table[state][parseCharacter].action)
+                            + ")"}
+                        </TableCell>
                     );
                 }
             }
             rows.push(
-                <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                <TableRow key={"stateRow " + state} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                 {row}
                 </TableRow>
             );
@@ -71,119 +97,111 @@ export default function TransitionTable(props) {
         return rows;
     }
     
-    function handleGenerateTable() {
-        const { changed, listOfStates, alphabet, acceptingStates } = props.updateInputs();
-        
-        if (!changed) {
-            return;
-        }
+    function handleResetTable(event) {
+        event.stopPropagation();
+        store.openResetTableModal();
+    }
 
-        let i = -1;
-        let j = -1;
+    function handleCloseResetTableModal(event) {
+        store.closeResetTableModal();
+    }
 
-        while (listOfStates[i] in store.transitionTable && i < listOfStates.length)
-            ++i;
-        
-        if(i >= 0){
-            while(alphabet[j] in store.transitionTable[listOfStates[0]] && j < alphabet.length)
-                ++j;
-        }
+    function handleConfirmResetTableModal(event) {
+        store.resetTransitionTable();
+    }
 
+    function getTable(table) {
+        console.log("rerendering the table");
+        let states = getStatesFromTable(table);
+        let alphabet = getAlphabetFromTable(table);
 
-        let newTransitionTable = {};
-        for (let a = 0; a < listOfStates.length; a++) {
-            let stateObj = {};
-            if (a <= i) {
-                for (let b = 0; b < alphabet.length; b++) {
-                    if (b <= j) {
-                        stateObj[alphabet[b]] = store.transitionTable[listOfStates[a]][alphabet[b]];
-                    } else {
-                        stateObj[alphabet[b]] = {write: null, action: null};
-                    }
-                }
-            } else {
-                for (let b = 0; b < alphabet.length; b++) {
-                    stateObj[alphabet[b]] = {write: null, action: null};
-                }
-            }
-            newTransitionTable[listOfStates[a]] = stateObj;
-            console.log(newTransitionTable);
-        }
-
-        // let newTransitionTable = {};
-        // for (let a = 0; a < listOfStates.length; a++) {
-        //     let stateObj = {};
-        //     for (let b = 0; b < alphabet.length; b++) {
-        //         stateObj[alphabet[b]] = {write: null, action: null}
-        //     }
-        //     newTransitionTable[listOfStates[a]] = stateObj;
-        // }
-        
-        setTable(
+        return (
             <div style={{display:"flex", "justifyContent": "center"}}>
-            <TableContainer component={Paper} sx={{minWidth: 200, maxWidth: getMaxWidth(alphabet), mt: "10vh"}}>
-                <Table sx={{maxWidth: getMaxWidth(alphabet) }} aria-label="simple table">
-                    <TableHead>
-                        <TableRow>
-                            <TableCell>States</TableCell>
+            <TableContainer component={Paper} sx={{minWidth: 200, maxWidth: getMaxTableWidth(alphabet)}}>
+                <Table sx={{maxWidth: getMaxTableWidth(alphabet)}} aria-label="simple table">
+
+                    <TableHead key={Math.random()}>
+                        <TableRow key={Math.random()}>
                             {getAlphabetRow(alphabet)}
                         </TableRow>
                     </TableHead>
-                    <TableBody>
-                        {getStateRows(newTransitionTable, listOfStates, alphabet, null)}
-                    </TableBody>
-                </Table>
-            </TableContainer>
-            </div>
-        );
-        store.updateTransitionTable(newTransitionTable);
-    }
 
-    function handleTableCellDoubleClick(event, state, character) {
-        event.stopPropagation();
-        let newCurrentlyEditingCell = {state, character, action: {}};
-        store.updateCurrentlyEditingCell(newCurrentlyEditingCell);
-        setTable(
-            <div style={{display:"flex", "justifyContent": "center"}}>
-            <TableContainer component={Paper} sx={{minWidth: 200, maxWidth: getMaxWidth(store.alphabet), mt: "10vh"}}>
-                <Table sx={{maxWidth: getMaxWidth(store.alphabet) }} aria-label="simple table">
-                    <TableHead>
-                        <TableRow>
-                            <TableCell>States</TableCell>
-                            {getAlphabetRow(store.alphabet)}
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {getStateRows(store.transitionTable, store.listOfStates, store.alphabet, newCurrentlyEditingCell)}
+                    <TableBody key={Math.random()}>
+                        {getStateRows(table, states, alphabet, store.currentlyEditingCell)}
                     </TableBody>
+
                 </Table>
             </TableContainer>
             </div>
         );
+    }
+    
+    function handleTableCellDoubleClick(event, state, parseCharacter) {
+        event.stopPropagation();
+        let newCurrentlyEditingCell = {state, parseCharacter, action: {}};
+        store.updateCurrentlyEditingCell(newCurrentlyEditingCell);
     }
 
     function handleOnEnter(event) {
         event.stopPropagation();
         if (event.key === "Enter") {
-            //get new cell action
             let cellArray = event.target.value.split(",").map(item => item.trim());
-            if (cellArray.length == 2) {
+            if (cellArray.length === 2) {
                 let cellAction = {write: cellArray[0], action: cellArray[1]};
                 let newTransitionTable = store.transitionTable;
-                newTransitionTable[store.currentlyEditingCell.state][store.currentlyEditingCell.character] = cellAction;
+                newTransitionTable[store.currentlyEditingCell.state][store.currentlyEditingCell.parseCharacter] = cellAction;
                 store.updateTransitionTable(newTransitionTable);
             }
             store.updateCurrentlyEditingCell(null);
         }
-        
+    }
+
+    function handleStartTM(event) {
+        store.updateTransitionTable({});
     }
 
     return (
         <div style={{display:"block", "justifyContent":"center"}}>
-        <Button variant="contained" color="success" sx={{mt: "8vh"}} onClick={handleGenerateTable}>
-        Generate Table
-        </Button>
-        {table}
+        {getTable(store.transitionTable)}
+        <Stack direction="row" spacing={2} alignItems="center" justifyContent="center" sx={{mt: "2em"}}>
+            <Button variant="contained" color="success" disabled={Object.keys(store.transitionTable).length === -1} onClick={handleStartTM}>Let's go !</Button>
+            <Button variant="contained" color="error" onClick={handleResetTable}>Reset Table</Button>
+        </Stack>
+
+        <Modal
+            aria-labelledby="transition-modal-title"
+            aria-describedby="transition-modal-description"
+            open={store.resetTableModalOpen}
+            onClose={handleCloseResetTableModal}
+            closeAfterTransition
+            BackdropComponent={Backdrop}
+            BackdropProps={{
+            timeout: 500,
+            }}
+        >
+            <Fade in={store.resetTableModalOpen}>
+            <Box sx={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                width: 400,
+                bgcolor: 'white',
+                border: '2px solid #000',
+                boxShadow: 24,
+                p: 4,
+            }}>
+                <Typography id="transition-modal-title" variant="h6" component="h2" align="center">
+                    Are you sure you want to reset the table?
+                </Typography>
+
+                <Stack direction="row" spacing={4} alignItems="center" justifyContent="center" sx={{minHeight: "3em", mt: "2em"}}>
+                    <Button variant="contained" sx={{width: "6em"}}>Yes</Button>
+                    <Button variant="contained" sx={{width: "6em"}}>Cancel</Button>
+                </Stack>
+            </Box>
+            </Fade>
+        </Modal>
         </div>
     );
 }

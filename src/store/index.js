@@ -3,90 +3,54 @@ import { createContext, useState} from 'react';
 const GlobalStoreContext = createContext({});
 
 export const GlobalStoreActionType = {
-    NAVIGATE_PAGE: "NAVIGATE_PAGE",
-    UPDATE_LIST_OF_STATES: "UPDATE_LIST_OF_STATES",
-    UPDATE_ALPHABET: "UPDATE_ALPHABET",
-    UPDATE_ACCEPTING_STATES: "UPDATE_ACCEPTING_STATES",
     UPDATE_TRANSITION_TABLE: "UPDATE_TRANSITION_TABLE",
-    UPDATE_CURRENTLY_EDITING_CELL: "UPDATE_CURRENTLY_EDITING_CELL"
+    RESET_TRANSITION_TABLE: "RESET_TRANSITION_TABLE",
+    UPDATE_CURRENTLY_EDITING_CELL: "UPDATE_CURRENTLY_EDITING_CELL",
+    SET_RESET_TABLE_MODAL: "SET_RESET_TABLE_MODAL",
 }
 
-export const GlobalStorePageType = {
-    HOME: "HOME",
-    ABOUT: "ABOUT",
-    VISUALIZE: "VISUALIZE",
+export const GlobalStoreDefaultTransitionTable = {
+    q1: {"a":{write: null, action: null}, "b":{write: null, action: null}},
+    q2: {"a":{write: null, action: null}, "b":{write: null, action: null}},
 }
 
 function GlobalStoreContextProvider(props) {
     const [store, setStore] = useState({
-        listOfStates: [],
-        alphabet: [],
-        acceptingStates: [],
-        transitionTable: {},
-        currentlyEditingCell: null, 
+        transitionTable: GlobalStoreDefaultTransitionTable,
+        currentlyEditingCell: null,
+        resetTableModalOpen: false,
     });
 
     const storeReducer = (action) => {
         const {type, payload} = action;
         
         switch(type) {
-            case GlobalStoreActionType.NAVIGATE_PAGE:
-                return setStore({
-                    listOfStates: store.listOfStates,
-                    alphabet: store.alphabet,
-                    acceptingStates: store.acceptingStates,
-                    transitionTable: store.transitionTable,
-                    currentlyEditingCell: store.currentlyEditingCell,
-                });
-
-            case GlobalStoreActionType.UPDATE_LIST_OF_STATES:
-                return setStore({
-                    listOfStates: payload,
-                    alphabet: store.alphabet,
-                    acceptingStates: store.acceptingStates,
-                    transitionTable: store.transitionTable,
-                    currentlyEditingCell: store.currentlyEditingCell,
-                   
-                });
-            
-            case GlobalStoreActionType.UPDATE_ALPHABET:
-                return setStore({        
-                    listOfStates: store.listOfStates,
-                    alphabet: payload,
-                    acceptingStates: store.acceptingStates,
-                    transitionTable: store.transitionTable,
-                    currentlyEditingCell: store.currentlyEditingCell,
-
-                });
-            
-            case GlobalStoreActionType.UPDATE_ACCEPTING_STATES:
-                return setStore({
-                    listOfStates: store.listOfStates,
-                    alphabet: store.alphabet,
-                    acceptingStates: payload,
-                    transitionTable: store.transitionTable,
-                    currentlyEditingCell: store.currentlyEditingCell,
-
-                });
-            
             case GlobalStoreActionType.UPDATE_TRANSITION_TABLE:
                 return setStore({
-                    listOfStates: store.listOfStates,
-                    alphabet: store.alphabet,
-                    acceptingStates: store.acceptingStates,
                     transitionTable: payload,
                     currentlyEditingCell: store.currentlyEditingCell,
-                   
+                    resetTableModalOpen: store.resetTableModalOpen,
                 });
-            //Edit for cell clicking functionality.
+
+            case GlobalStoreActionType.RESET_TRANSITION_TABLE:
+                return setStore({
+                    transitionTable: GlobalStoreDefaultTransitionTable,
+                    currentlyEditingCell: null,
+                    resetTableModalOpen: false,
+                });
+
             case GlobalStoreActionType.UPDATE_CURRENTLY_EDITING_CELL:
                 return setStore({
-                    currentPage:store.currentPage,
-                    listOfStates: store.listOfStates,
-                    alphabet: store.alphabet,
-                    acceptingStates: store.acceptingStates,
                     transitionTable: store.transitionTable,
                     currentlyEditingCell : payload,
+                    resetTableModalOpen: store.resetTableModalOpen,
+                });
+            
+            case GlobalStoreActionType.SET_RESET_TABLE_MODAL:
+                return setStore({
+                    transitionTable: store.transitionTable,
+                    currentlyEditingCell : store.currentlyEditingCell,
+                    resetTableModalOpen: payload,
                 });
             
             default:
@@ -94,45 +58,43 @@ function GlobalStoreContextProvider(props) {
         }
     }
 
-    store.navigatePage = function(pageType) {
-        storeReducer({
-            type: GlobalStoreActionType.NAVIGATE_PAGE,
-            payload: pageType
-        });
-    }
-
-    store.updateListOfStates = function(newStates) {
-        storeReducer({
-            type: GlobalStoreActionType.UPDATE_LIST_OF_STATES,
-            payload: newStates
-        });
-    }
-
-    store.updateAlphabet = (newAlphabet) => {
-        storeReducer({
-            type: GlobalStoreActionType.UPDATE_ALPHABET,
-            payload: newAlphabet
-        });
-    }
-
-    store.updateAcceptingStates = (newAcceptingStates) => {
-        storeReducer({
-            type: GlobalStoreActionType.UPDATE_ACCEPTING_STATES,
-            payload: newAcceptingStates
-        });
-    }
-
     store.updateTransitionTable = (transitionTable) => {
+        console.log("updated transition table");
+        console.log(transitionTable);
         storeReducer({
             type: GlobalStoreActionType.UPDATE_TRANSITION_TABLE,
             payload: transitionTable
         });
     }
 
+    store.resetTransitionTable = () => {
+        console.log("reset transition table");
+        storeReducer({
+            type: GlobalStoreActionType.RESET_TRANSITION_TABLE,
+            payload: null
+        });
+    }
+
     store.updateCurrentlyEditingCell = (cell) => {
+        console.log("updated currently editing cell");
+        console.log(cell);
         storeReducer({
             type: GlobalStoreActionType.UPDATE_CURRENTLY_EDITING_CELL,
             payload: cell
+        });
+    }
+
+    store.openResetTableModal = () => {
+        storeReducer({
+            type: GlobalStoreActionType.SET_RESET_TABLE_MODAL,
+            payload: true
+        });
+    }
+
+    store.closeResetTableModal = () => {
+        storeReducer({
+            type: GlobalStoreActionType.SET_RESET_TABLE_MODAL,
+            payload: false
         });
     }
 
@@ -141,7 +103,6 @@ function GlobalStoreContextProvider(props) {
             {props.children}
         </GlobalStoreContext.Provider>
     );
-    
 }
 
 export { GlobalStoreContextProvider, GlobalStoreContext };

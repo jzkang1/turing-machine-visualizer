@@ -9,12 +9,6 @@ import {AppBar, Toolbar, Typography} from '@mui/material'
 function App() {
     const {store} = useContext(GlobalStoreContext);
 
-    const getCurrentPage = () => {
-        if (store.currentPage) {
-
-        }
-    }
-
     return (
         <BrowserRouter>
             <GlobalStoreContextProvider>
@@ -22,14 +16,14 @@ function App() {
                 <AppBar position="relative">
                     <Toolbar>
                         <Typography variant="h6" color="inherit" noWrap>
-                        TM
+                        TMV
                         </Typography>
                     </Toolbar>
                 </AppBar>
                     <Routes>
-                        <Route path="/" exact element={<HomePage/>} />
-                        <Route path="/about" exact element={<AboutPage/>} />
-                        <Route path="/visualize" exact element={<VisualizePage/>} />
+                        <Route path="/" exact element={<HomePage/>}/>
+                        <Route path="/about" exact element={<AboutPage/>}/>
+                        <Route path="/visualize" exact element={<VisualizePage/>}/>
                     </Routes>
                 </div>
             </GlobalStoreContextProvider>
