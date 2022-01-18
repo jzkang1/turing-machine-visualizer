@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useContext, useCallback, useMemo } from 'react';
 import { GlobalStoreContext } from '../store';
 import { TableContainer, Table, TableHead, TableBody, TableRow, TableCell } from '@mui/material/';
 import { TextField } from '@mui/material';
@@ -11,7 +11,6 @@ import { Fade } from '@mui/material';
 import { Box } from '@mui/system';
 import { Typography } from '@mui/material';
 import MenuItem from '@mui/material/MenuItem';
-import { getStatesFromTable, getAlphabetFromTable } from '../utils';
 
 
 export default function TransitionTable(props) {
@@ -26,46 +25,41 @@ export default function TransitionTable(props) {
     }
 
     function handleCellActionChange(event, state, parseCharacter) {
-        let newTransitionTable = store.transitionTable;
-        newTransitionTable[state][parseCharacter].action = event.target.value;
-        store.updateTransitionTable(newTransitionTable);
+        store.setCellAction(state, parseCharacter, event.target.value);
     }
     
     function handleCellStateChange(event, state, parseCharacter) {
-        let newTransitionTable = store.transitionTable;
-        newTransitionTable[state][parseCharacter].newState = event.target.value;
-        store.updateTransitionTable(newTransitionTable);
+        store.setCellNewState(state, parseCharacter, event.target.value);
     }
 
-    function getAlphabetRow(alphabet) {
+    const getAlphabetRow = useCallback(() => {
         let row = [<TableCell key="states" sx={{maxWidth: 50}}>States</TableCell>];
-        if (alphabet === null || alphabet.length === 0) {
+        if (store.alphabet === null || store.alphabet.length === 0) {
             return row;
         }
 
-        for (let i = 0; i < alphabet.length; i++) {
-            row.push(<TableCell key={alphabet[i]} align="center" sx={{minWidth: 50}}>{alphabet[i]}</TableCell>);
+        for (let i = 0; i < store.alphabet.length; i++) {
+            row.push(<TableCell key={store.alphabet[i]} align="center" sx={{minWidth: 50}}>{store.alphabet[i]}</TableCell>);
         }
         return row;
-    }
+    }, [store.alphabet]);
 
-    function getStateRows(states, alphabet) {
+    const getStateRows = () => {
         let rows = [];
-        for (let state of states) {
+        for (let state of store.states) {
             let row = [<TableCell component="th">{state}</TableCell>];
-            for (let parseCharacter of alphabet) {
+            for (let parseCharacter of store.alphabet) {
                 row.push(
                     <TableCell
                     key={state + " " + parseCharacter}
                     align="center"
                     >
                         <Stack direction="column">
-
                             {/* Action */}
                             <TextField
                             select
-                            label="Action"
-                            sx={{minWidth: "6em"}}
+                            label="A"
+                            sx={{minWidth: "4em", maxWidth: "5em", minHeight: "2em", maxHeight: "3em"}}
                             value={store.transitionTable[state][parseCharacter].action === null ? "" : store.transitionTable[state][parseCharacter].action}
                             onChange={(event) => {handleCellActionChange(event, state, parseCharacter)}}
                             >
@@ -80,8 +74,8 @@ export default function TransitionTable(props) {
                             <TextField
                             id="outlined-select-currency"
                             select
-                            label="New State"
-                            sx={{mt: "1em"}}
+                            label="Q"
+                            sx={{mt: "1em", minWidth: "4em", maxWidth: "5em", minHeight: "2em", maxHeight: "3em"}}
                             value={store.transitionTable[state][parseCharacter].newState === null ? "" : store.transitionTable[state][parseCharacter].newState}
                             onChange={(event) => {handleCellStateChange(event, state, parseCharacter)}}
                             >
@@ -104,30 +98,8 @@ export default function TransitionTable(props) {
             );
         }
         return rows;
-    }
+    };
     
-    function addRow(table, states, alphabet) {
-        let latestStateNum = states[states.length-1].slice(1);
-        let newState = "q" + (parseInt(latestStateNum) + 1).toString();
-        states.push(newState)
-        let newTransitionTable = table;
-        newTransitionTable[newState] = {};
-        for (let character of alphabet){
-            newTransitionTable[newState][character] = {action: null, newState: null}
-        }
-        store.updateTransitionTable(newTransitionTable, states, alphabet);
-    }
-
-    function addColumn(table, states, alphabet){
-        let latestCharacter = parseInt(alphabet[alphabet.length-1]);
-        let newCharacter = (latestCharacter + 1).toString();
-        alphabet.push(newCharacter);
-        let newTransitionTable = table;
-        for(let state of states){
-            newTransitionTable[state][newCharacter] = {action: null, newState: null}
-        }
-        store.updateTransitionTable(newTransitionTable, states, alphabet);
-    }
 
     function handleResetTable(event) {
         event.stopPropagation();
@@ -142,41 +114,42 @@ export default function TransitionTable(props) {
     function handleCloseResetTableModal(event) {
         store.closeResetTableModal();
     }
+    
 
-    function getTable(table) {
-        let states = getStatesFromTable(table);
-        let alphabet = getAlphabetFromTable(table);
-
+    const getTable = () => {
+        console.log("got table");
         return (
             <div style={{display:"flex", "justifyContent": "center"}}>
-            <TableContainer component={Paper} sx={{minWidth: 200, maxWidth: getMaxTableWidth(alphabet)}}>
-                <Table sx={{maxWidth: getMaxTableWidth(alphabet)}} aria-label="simple table">
-                    <TableHead key={Math.random()}>
-                        <TableRow key={Math.random()}>
-                            {getAlphabetRow(alphabet)}
+            <TableContainer component={Paper} sx={{minWidth: 200, maxWidth: getMaxTableWidth(store.alphabet)}}>
+                <Table sx={{maxWidth: getMaxTableWidth(store.alphabet)}} aria-label="simple table">
+                    <TableHead >
+                        <TableRow>
+                            {getAlphabetRow()}
                         </TableRow>
-                        <TableRow key={Math.random()}>
-                        <Button onClick={(event) => {addColumn(table, states, alphabet)}}>Add New Column</Button>
-                        </TableRow>
+
+
                     </TableHead>
 
-                    <TableBody key={Math.random()}>
-                        {getStateRows(states, alphabet)}
+                    <TableBody>
+                        {getStateRows()}
                     </TableBody>
                 </Table>
-                <Button onClick={(event) => {addRow(table, states, alphabet)}}>Add New State</Button> 
+
+                <Button onClick={store.addRow}>Add New State</Button>
+                
             </TableContainer>
+            <Button onClick={store.addColumn}>Add New Column</Button>
             </div>
         );
-    }
+    };
 
     function handleStartTM(event) {
         store.updateTransitionTable({});
     }
-
+    
     return (
         <div style={{display:"block", "justifyContent":"center"}}>
-        {getTable(store.transitionTable)}
+        {getTable()}
         
         <Stack direction="row" spacing={2} alignItems="center" justifyContent="center" sx={{mt: "2em"}}>
             <Button variant="contained" color="success" disabled={Object.keys(store.transitionTable).length === -1} onClick={handleStartTM}>Let's go !</Button>

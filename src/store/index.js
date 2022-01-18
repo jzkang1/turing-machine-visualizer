@@ -1,5 +1,5 @@
 import { createContext, useState} from 'react';
-import { getStatesFromTable, getAlphabetFromTable, deepObjectCopy } from '../utils.js';
+import { deepObjectCopy, getAlphabetFromTable, getStatesFromTable } from '../utils.js';
 
 const GlobalStoreContext = createContext({});
 
@@ -7,6 +7,8 @@ export const GlobalStoreActionType = {
     UPDATE_TRANSITION_TABLE: "UPDATE_TRANSITION_TABLE",
     RESET_TRANSITION_TABLE: "RESET_TRANSITION_TABLE",
     SET_RESET_TABLE_MODAL: "SET_RESET_TABLE_MODAL",
+    SET_DELETE_STATE_MODAL: "SET_DELETE_STATE_MODAL",
+    SET_DELETE_PARSE_CHARACTER_MODAL: "SET_DELETE_PARSE_CHARACTER_MODAL",
 }
 
 export const GlobalStoreDefaultTransitionTable = {
@@ -28,6 +30,7 @@ function GlobalStoreContextProvider(props) {
         
         switch(type) {
             case GlobalStoreActionType.UPDATE_TRANSITION_TABLE:
+                console.log("updated transition table");
                 return setStore({
                     transitionTable: payload.newTransitionTable,
                     states: payload.newStates,
@@ -59,13 +62,13 @@ function GlobalStoreContextProvider(props) {
         }
     }
 
-    store.updateTransitionTable = (newTransitionTable, newStates, newAlphabet) => {
+    store.updateTransitionTable = (newTransitionTable) => {
         storeReducer({
             type: GlobalStoreActionType.UPDATE_TRANSITION_TABLE,
             payload: {
                 newTransitionTable,
-                newStates,
-                newAlphabet,
+                newStates: getStatesFromTable(newTransitionTable),
+                newAlphabet: getAlphabetFromTable(newTransitionTable),
             }
         });
     }
@@ -75,6 +78,39 @@ function GlobalStoreContextProvider(props) {
             type: GlobalStoreActionType.RESET_TRANSITION_TABLE,
             payload: null
         });
+    }
+
+    store.addRow = () => {
+        let latestStateNum = store.states[store.states.length-1].slice(1);
+        let newState = "q" + (parseInt(latestStateNum) + 1).toString();
+        let newTransitionTable = store.transitionTable;
+        newTransitionTable[newState] = {};
+        for (let character of store.alphabet){
+            newTransitionTable[newState][character] = {action: null, newState: null}
+        }
+        store.updateTransitionTable(newTransitionTable);
+    }
+
+    store.addColumn = () => {
+        let latestCharacter = parseInt(store.alphabet[store.alphabet.length-1]);
+        let newCharacter = (latestCharacter + 1).toString();
+        let newTransitionTable = store.transitionTable;
+        for(let state of store.states) {
+            newTransitionTable[state][newCharacter] = {action: null, newState: null}
+        }
+        store.updateTransitionTable(newTransitionTable);
+    }
+
+    store.setCellAction = (state, parseCharacter, newAction) => {
+        let newTransitionTable = store.transitionTable;
+        newTransitionTable[state][parseCharacter].action = newAction;
+        store.updateTransitionTable(newTransitionTable);
+    }
+
+    store.setCellNewState = (state, parseCharacter, newAction) => {
+        let newTransitionTable = store.transitionTable;
+        newTransitionTable[state][parseCharacter].newState = newAction;
+        store.updateTransitionTable(newTransitionTable);
     }
 
     store.openResetTableModal = () => {
@@ -87,6 +123,20 @@ function GlobalStoreContextProvider(props) {
     store.closeResetTableModal = () => {
         storeReducer({
             type: GlobalStoreActionType.SET_RESET_TABLE_MODAL,
+            payload: false
+        });
+    }
+
+    store.openDeleteStateModal = () => {
+        storeReducer({
+            type: GlobalStoreActionType.SET_DELETE_STATE_MODAL,
+            payload: true
+        });
+    }
+
+    store.closeDeleteStateModal = () => {
+        storeReducer({
+            type: GlobalStoreActionType.SET_DELETE_STATE_MODAL,
             payload: false
         });
     }

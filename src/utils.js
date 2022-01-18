@@ -7,8 +7,14 @@ export const getStatesFromTable = (table) => {
 }
 
 export const getAlphabetFromTable = (table) => {
-    let randomState = Object.keys(table)[0];
     let alphabet = [];
+    let keys = Object.keys(table);
+    
+    if (keys.length === 0) {
+        return alphabet;
+    }
+
+    let randomState = keys[0];
     for (let parseCharacter in table[randomState]) {
         alphabet.push(parseCharacter);
     }
