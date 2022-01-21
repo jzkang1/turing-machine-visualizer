@@ -1,4 +1,4 @@
-import { useContext, useCallback, useMemo } from 'react';
+import React, { useContext, useCallback, useMemo } from 'react';
 import { GlobalStoreContext } from '../store';
 import { TableContainer, Table, TableHead, TableBody, TableRow, TableCell } from '@mui/material/';
 import { TextField } from '@mui/material';
@@ -11,7 +11,8 @@ import { Fade } from '@mui/material';
 import { Box } from '@mui/system';
 import { Typography } from '@mui/material';
 import MenuItem from '@mui/material/MenuItem';
-
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import { Icon } from '@mui/material';
 
 export default function TransitionTable(props) {
     const {store} = useContext(GlobalStoreContext);
@@ -47,7 +48,7 @@ export default function TransitionTable(props) {
     const getStateRows = () => {
         let rows = [];
         for (let state of store.states) {
-            let row = [<TableCell component="th">{state}</TableCell>];
+            let row = [<React.Fragment><TableCell component="th">{state}</TableCell></React.Fragment>];
             for (let parseCharacter of store.alphabet) {
                 row.push(
                     <TableCell
@@ -135,10 +136,14 @@ export default function TransitionTable(props) {
                     </TableBody>
                 </Table>
 
-                <Button onClick={store.addRow}>Add New State</Button>
+                <Icon onClick={store.addRow} style={{cursor:"pointer"}}>
+                    {<AddCircleOutlineIcon/>}
+                </Icon>
                 
             </TableContainer>
-            <Button onClick={store.addColumn}>Add New Column</Button>
+            <Icon onClick={store.addColumn} style={{cursor:"pointer"}}>
+                {<AddCircleOutlineIcon/>}
+            </Icon>
             </div>
         );
     };

@@ -9,6 +9,7 @@ export const GlobalStoreActionType = {
     SET_RESET_TABLE_MODAL: "SET_RESET_TABLE_MODAL",
     SET_DELETE_STATE_MODAL: "SET_DELETE_STATE_MODAL",
     SET_DELETE_PARSE_CHARACTER_MODAL: "SET_DELETE_PARSE_CHARACTER_MODAL",
+    UPDATE_IS_TAPE_RUNNING: "UPDATE_IS_TAPE_RUNNING",
 }
 
 export const GlobalStoreDefaultTransitionTable = {
@@ -23,6 +24,7 @@ function GlobalStoreContextProvider(props) {
         alphabet: ["0", "1"],
         acceptingStates: [],
         resetTableModalOpen: false,
+        isTapeRunning: false,
     });
 
     const storeReducer = (action) => {
@@ -37,6 +39,7 @@ function GlobalStoreContextProvider(props) {
                     alphabet: payload.newAlphabet,
                     acceptingStates: store.acceptingStates,
                     resetTableModalOpen: store.resetTableModalOpen,
+                    isTapeRunning: store.isTapeRunning,
                 });
 
             case GlobalStoreActionType.RESET_TRANSITION_TABLE:
@@ -46,6 +49,7 @@ function GlobalStoreContextProvider(props) {
                     alphabet: ["0", "1"],
                     acceptingStates: [],
                     resetTableModalOpen: false,
+                    isTapeRunning: store.isTapeRunning,
                 });
 
             case GlobalStoreActionType.SET_RESET_TABLE_MODAL:
@@ -55,8 +59,18 @@ function GlobalStoreContextProvider(props) {
                     alphabet: store.alphabet,
                     acceptingStates: store.acceptingStates,
                     resetTableModalOpen: payload,
+                    isTapeRunning: store.isTapeRunning,
                 });
             
+            case GlobalStoreActionType.UPDATE_IS_TAPE_RUNNING:
+                return setStore({
+                    transitionTable: store.transitionTable,
+                    states: store.states,
+                    alphabet: store.alphabet,
+                    acceptingStates: store.acceptingStates,
+                    resetTableModalOpen: store.resetTableModalOpen,
+                    isTapeRunning: payload,
+                })
             default:
                 break;
         }
@@ -139,6 +153,20 @@ function GlobalStoreContextProvider(props) {
             type: GlobalStoreActionType.SET_DELETE_STATE_MODAL,
             payload: false
         });
+    }
+
+    store.startRunningTape = () => {
+        storeReducer({
+            type: GlobalStoreActionType.UPDATE_IS_TAPE_RUNNING,
+            payload: true
+        })
+    }
+
+    store.stopRunningTape = () => {
+        storeReducer({
+            type: GlobalStoreActionType.UPDATE_IS_TAPE_RUNNING,
+            payload: false
+        })
     }
 
     return (
