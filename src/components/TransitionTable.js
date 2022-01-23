@@ -33,6 +33,15 @@ export default function TransitionTable(props) {
         store.setCellNewState(state, parseCharacter, event.target.value);
     }
 
+    function handleStateClick(event, state) {
+        event.stopPropagation();
+        if (store.acceptingStates.includes(state)) {
+            store.removeAcceptingState(state);
+        } else {
+            store.addAcceptingState(state);
+        }
+    }
+
     const getAlphabetRow = useCallback(() => {
         let row = [<TableCell key="states" sx={{maxWidth: 50}}>States</TableCell>];
         if (store.alphabet === null || store.alphabet.length === 0) {
@@ -48,7 +57,16 @@ export default function TransitionTable(props) {
     const getStateRows = () => {
         let rows = [];
         for (let state of store.states) {
-            let row = [<React.Fragment><TableCell component="th">{state}</TableCell></React.Fragment>];
+            let row = [];
+            row.push(
+                <TableCell
+                    component="th"
+                    sx={{color: store.acceptingStates.includes(state) ? "green" : ""}}
+                    onClick={(event) => {handleStateClick(event, state)}}
+                >
+                    {state}
+                </TableCell>
+            );
             for (let parseCharacter of store.alphabet) {
                 row.push(
                     <TableCell
