@@ -11,8 +11,10 @@ export const GlobalStoreActionType = {
     SET_DELETE_PARSE_CHARACTER_MODAL: "SET_DELETE_PARSE_CHARACTER_MODAL",
     SET_ACCEPTING_STATES: "SET_ACCEPTING_STATES",
     UPDATE_IS_TAPE_RUNNING: "UPDATE_IS_TAPE_RUNNING",
+    SET_TAPE_RUNTIME_OBJ: "SET_TAPE_RUNTIME_OBJ",
 }
 
+// ALWAYS MAKE A DEEP COPY, NEVER DIRECTLY REFERENCE
 export const GlobalStoreDefaultTransitionTable = {
     q1: {"0":{action: null, newState: null}, "1":{action: null, newState: null}},
     q2: {"0":{action: null, newState: null}, "1":{action: null, newState: null}},
@@ -25,7 +27,7 @@ function GlobalStoreContextProvider(props) {
         alphabet: ["0", "1"],
         acceptingStates: [],
         resetTableModalOpen: false,
-        isTapeRunning: false,
+        tapeRuntimeObj: null,
     });
 
     const storeReducer = (action) => {
@@ -40,7 +42,7 @@ function GlobalStoreContextProvider(props) {
                     alphabet: payload.newAlphabet,
                     acceptingStates: store.acceptingStates,
                     resetTableModalOpen: store.resetTableModalOpen,
-                    isTapeRunning: store.isTapeRunning,
+                    tapeRuntimeObj: null,
                 });
 
             case GlobalStoreActionType.RESET_TRANSITION_TABLE:
@@ -50,7 +52,7 @@ function GlobalStoreContextProvider(props) {
                     alphabet: ["0", "1"],
                     acceptingStates: [],
                     resetTableModalOpen: false,
-                    isTapeRunning: store.isTapeRunning,
+                    tapeRuntimeObj: null,
                 });
 
             case GlobalStoreActionType.SET_RESET_TABLE_MODAL:
@@ -60,7 +62,7 @@ function GlobalStoreContextProvider(props) {
                     alphabet: store.alphabet,
                     acceptingStates: store.acceptingStates,
                     resetTableModalOpen: payload,
-                    isTapeRunning: store.isTapeRunning,
+                    tapeRuntimeObj: null,
                 });
 
             case GlobalStoreActionType.SET_ACCEPTING_STATES:
@@ -70,17 +72,17 @@ function GlobalStoreContextProvider(props) {
                     alphabet: store.alphabet,
                     acceptingStates: payload,
                     resetTableModalOpen: store.resetTableModalOpen,
-                    isTapeRunning: store.isTapeRunning,
+                    tapeRuntimeObj: store.tapeRuntimeObj,
                 });
             
-            case GlobalStoreActionType.UPDATE_IS_TAPE_RUNNING:
+            case GlobalStoreActionType.SET_TAPE_RUNTIME_OBJ:
                 return setStore({
                     transitionTable: store.transitionTable,
                     states: store.states,
                     alphabet: store.alphabet,
                     acceptingStates: store.acceptingStates,
                     resetTableModalOpen: store.resetTableModalOpen,
-                    isTapeRunning: payload,
+                    tapeRuntimeObj: payload,
                 });
 
             default:
@@ -185,17 +187,26 @@ function GlobalStoreContextProvider(props) {
         });
     }
 
-    store.startRunningTape = () => {
+    store.startMachine = () => {
         storeReducer({
-            type: GlobalStoreActionType.UPDATE_IS_TAPE_RUNNING,
-            payload: true
+            type: GlobalStoreActionType.SET_TAPE_RUNTIME_OBJ,
+            payload: {paused: false}
         });
     }
 
-    store.stopRunningTape = () => {
+    store.pauseMachine = () => {
         storeReducer({
-            type: GlobalStoreActionType.UPDATE_IS_TAPE_RUNNING,
-            payload: false
+            type: GlobalStoreActionType.SET_TAPE_RUNTIME_OBJ,
+            payload: {paused: true}
+        });
+    }
+
+    store.unpauseMachine = () => {
+        let newTapeRuntimeObj = store.tapeRuntimeObj;
+        newTapeRuntimeObj.paused = false;
+        storeReducer({
+            type: GlobalStoreActionType.SET_TAPE_RUNTIME_OBJ,
+            payload: newTapeRuntimeObj
         });
     }
 

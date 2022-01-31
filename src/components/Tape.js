@@ -11,9 +11,17 @@ export default function Tape(props) {
     const { store } = useContext(GlobalStoreContext);
 
     const [tape, setTape] = useState([]);
+
+    // must be constant size
+    const [tapeDisplay, setTapeDisplay] = useState([]);
+
+    // string representing the current runtime state
     const [machineState, setMachineState] = useState(store.startingState);
 
     const [actionQueue, setActionQueue] = useState([]);
+
+    // machine's runtime timeout object, used to stop and start the machine
+    const [machineTimeout, setMachineTimeout] = useState(null);
 
     const tapeRef = useRef(null);
 
@@ -22,12 +30,62 @@ export default function Tape(props) {
         console.log("yuh")
     }
 
-    function handleClickStart(event) {
+    function getStartOrPauseButton() {
+        if (store.tapeRuntimeObj === null || (store.tapeRuntimeObj !== null && store.tapeRuntimeObj.paused === true)) {
+            return (
+                <IconButton
+                    edge="end"
+                    aria-label=""
+                    aria-haspopup="true"
+                    color="inherit"
+                    onClick={handleClickStart}
+                >
+                    <PlayArrowIcon/>
+                </IconButton>
+            )
+        } else {
+            return (
+                <IconButton
+                    edge="end"
+                    aria-label=""
+                    aria-haspopup="true"
+                    color="inherit"
+                    onClick={handleClickPause}
+                >
+                    <PauseIcon/>
+                </IconButton>
+            )
+        }
+    }
 
+    function handleClickStart(event) {
+        event.stopPropagation();
+
+        if (store.tapeRuntimeObj === null) {
+            store.startMachine();
+            let timeout = setTimeout(() => {
+                let parsedCharacter = tapeDisplay[tapeDisplay.length/2];
+                let logicObj = store.transitionTable[machineState][parsedCharacter];
+
+                if (logicObj.action === "←") {
+                    moveLeft();
+                } else if (logicObj.action === "→") {
+                    moveRight();
+                } else if (logicObj.action !== parsedCharacter) {
+                    let newTape = tape;
+                    // setTape(newTape);
+                }
+            }, 1000);
+
+        } else if (store.tapeRuntimeObj !== null && store.tapeRuntimeObj.paused) {
+            store.unpauseMachine();
+        }
     }
 
     function handleClickPause(event) {
-
+        if (store.tapeRuntimeObj !== null && !store.tapeRuntimeObj.paused) {
+            store.pauseMachine();
+        }
     }
 
     function handleClickStop(event) {
@@ -90,6 +148,10 @@ export default function Tape(props) {
 
                 <IconButton>
                     <PauseIcon/>
+                </IconButton>
+
+                <IconButton>
+                    {getStartOrPauseButton()}
                 </IconButton>
 
                 <IconButton>
