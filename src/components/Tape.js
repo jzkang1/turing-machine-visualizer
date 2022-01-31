@@ -1,8 +1,11 @@
 import React, { useContext, useState, useEffect, useRef } from 'react';
 import { GlobalStoreContext } from '../store/index.js'
 import ChangeHistoryIcon from '@mui/icons-material/ChangeHistory';
-import { Icon } from '@mui/material';
+import { Icon, IconButton } from '@mui/material';
 import { Box, Stack, TextField, Button} from '@mui/material';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import PauseIcon from '@mui/icons-material/Pause';
+import StopIcon from '@mui/icons-material/Stop';
 
 export default function Tape(props) {
     const { store } = useContext(GlobalStoreContext);
@@ -17,6 +20,18 @@ export default function Tape(props) {
     function handleLoadInput(event) {
         setTape(event.target.value);
         console.log("yuh")
+    }
+
+    function handleClickStart(event) {
+
+    }
+
+    function handleClickPause(event) {
+
+    }
+
+    function handleClickStop(event) {
+
     }
 
     useEffect(() => {
@@ -50,20 +65,37 @@ export default function Tape(props) {
             
             <Box component="form" noValidate onSubmit={handleLoadInput} sx={{maxWidth: "20em", maxHeight: "20em"}}>
                 <Stack direction="row">
-                <TextField
-                    margin="normal"
-                    required
-                    fullWidth
-                    id="input"
-                    label="Tape Input"
-                    name="input"
-                    autoFocus
-                />
-                <Button
-                    variant="contained"
-                >Load</Button>
+                    <TextField
+                        margin="normal"
+                        required
+                        fullWidth
+                        id="input"
+                        label="Tape Input"
+                        name="input"
+                        autoFocus
+                    />
+
+                    <Button
+                        variant="contained"
+                    >
+                        Load
+                    </Button>
                 </Stack>
             </Box>
+
+            <Stack direction="row" >
+                <IconButton>
+                    <PlayArrowIcon/>
+                </IconButton>
+
+                <IconButton>
+                    <PauseIcon/>
+                </IconButton>
+
+                <IconButton>
+                    <StopIcon/>
+                </IconButton>
+            </Stack>
         </div>
     );
 }
