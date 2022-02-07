@@ -10,10 +10,12 @@ import StopIcon from '@mui/icons-material/Stop';
 export default function Tape(props) {
     const { store } = useContext(GlobalStoreContext);
 
+    // the entire tape array
+    // may be dynamically expanded
     const [tape, setTape] = useState([]);
 
-    // must be constant size
-    const [tapeDisplay, setTapeDisplay] = useState([]);
+    // index of the tape pointer in the tape array
+    const [tapePointer, setTapePointer] = useState(0);
 
     // string representing the current runtime state
     const [machineState, setMachineState] = useState(store.startingState);
@@ -64,7 +66,7 @@ export default function Tape(props) {
         if (store.tapeRuntimeObj === null) {
             store.startMachine();
             let timeout = setTimeout(() => {
-                let parsedCharacter = tapeDisplay[tapeDisplay.length/2];
+                let parsedCharacter = tape[tapePointer];
                 let logicObj = store.transitionTable[machineState][parsedCharacter];
 
                 if (logicObj.action === "←") {
@@ -92,6 +94,14 @@ export default function Tape(props) {
 
     }
 
+    function moveLeft() {
+        setTapePointer(tapePointer-1);
+    }
+
+    function moveRight() {
+        setTapePointer(tapePointer-1);
+    }
+
     useEffect(() => {
         const tape = tapeRef.current;
         const context = tape.getContext('2d');
@@ -112,7 +122,7 @@ export default function Tape(props) {
             context.strokeRect(i, 0, 100, 100);
             context.fillText("1", i+30, 75)
         }
-    }, []);
+    }, [tapePointer]);
 
     return (
         <div display="flex" align="center">
